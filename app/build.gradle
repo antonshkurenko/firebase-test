@@ -1,0 +1,94 @@
+buildscript {
+
+  repositories {
+    jcenter()
+  }
+
+  dependencies {
+    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    classpath 'me.tatarka:gradle-retrolambda:3.2.5'
+  }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.google.gms.google-services'
+
+android {
+  compileSdkVersion 23
+  buildToolsVersion "23.0.3"
+
+  defaultConfig {
+    applicationId "io.github.tonyshkurenko.firebasetest"
+    minSdkVersion 15
+    targetSdkVersion 23
+    versionCode 1
+    versionName "1.0"
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/LICENSE-FIREBASE.txt'
+    exclude 'META-INF/NOTICE'
+  }
+}
+
+dependencies {
+
+  // android support libraries
+  def androidSupportVersion = '23.4.0'
+  compile "com.android.support:appcompat-v7:${androidSupportVersion}"
+  compile "com.android.support:recyclerview-v7:${androidSupportVersion}"
+  compile "com.android.support:design:${androidSupportVersion}"
+
+  // timber logging
+  compile 'com.jakewharton.timber:timber:4.1.2'
+
+  // butterknife
+  def butterknifeVersion = '8.0.1'
+  compile "com.jakewharton:butterknife:${butterknifeVersion}"
+  apt "com.jakewharton:butterknife-compiler:${butterknifeVersion}"
+
+  // firebase
+  def firebaseVersion = '9.0.1'
+  compile "com.google.firebase:firebase-core:${firebaseVersion}"
+  compile "com.google.firebase:firebase-database:${firebaseVersion}"
+  compile "com.google.firebase:firebase-auth:${firebaseVersion}"
+
+  // retrolambda
+  retrolambdaConfig 'com.jakewharton.retrolambda:retrolambda:2.1.0-jake2'
+}
+
+// retrolambda
+
+String java8 = getJavaVersion(8)
+String java7 = getJavaVersion(7)
+
+retrolambda {
+  jdk java8
+  oldJdk java7
+  javaVersion JavaVersion.VERSION_1_7
+  defaultMethods false
+  incremental true
+}
+
+String getJavaVersion(Integer v) {
+  def sout = new StringBuffer()
+  def proc = "/usr/libexec/java_home -v 1.$v".execute()
+  proc.consumeProcessOutput(sout, new StringBuffer())
+  proc.waitForOrKill(1000)
+  return sout.toString().replace("\n", "").replace("\r", "")
+}
